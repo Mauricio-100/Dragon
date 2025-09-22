@@ -8,6 +8,12 @@ const figlet = require('figlet');
 const gradient = require('gradient-string');
 const fs = require('fs/promises');
 const readline = require('readline'); // <-- Remplacement de inquirer
+const fetch = require('node-fetch');
+global.fetch = fetch;
+
+// ... la suite de votre code commence ici
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+// ... etc.
 
 // --- CONFIGURATION ---
 dotenv.config();
@@ -135,3 +141,5 @@ async function executeAction(action) {
 
 // --- DÉMARRAGE ---
 dragonShell();
+
+
