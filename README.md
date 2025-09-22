@@ -1,5 +1,6 @@
-<!-- Remplacez "dragon-cli" par le nom de votre paquet npm -->
-<!-- Remplacez "Mauricio-100/Dragon" par votre "utilisateur/dépôt" GitHub -->
+
+<img width="1024" height="1024" alt="Generated Image September 22, 2025 - 12_30PM" src="https://github.com/user-attachments/assets/76efd099-933b-4dd3-8a8b-d4c3e56ed7d5" />
+/dépôt" GitHub 
 
 # 🐉 Dragon CLI - Votre Assistant IA Personnel dans le Terminal
 
