@@ -1,0 +1,12 @@
+# .gitignore
+
+# DC)pendances
+node_modules
+
+# Fichiers d'environnement (contient les secrets)
+.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

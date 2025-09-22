@@ -1,0 +1,12 @@
+# .npmignore
+
+# Fichiers de configuration spC)cifiques au dC)veloppement
+.env
+.gitignore
+
+# Dossiers de test (si vous en avez)
+/tests
+
+# Tout autre fichier de configuration de l'C)diteur ou de l'OS
+.vscode/
+.DS_Store
