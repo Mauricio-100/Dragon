@@ -17,7 +17,7 @@ const readline = require('readline');
 // --- CONFIGURATION ---
 dotenv.config();
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
-// LA CORRECTION : Utilisation du modèle Gemini Flash pour une vitesse maximale
+// Utilisation du modèle Gemini Flash ("Lite") pour une vitesse maximale
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
 // Création de l'interface readline pour les prompts
@@ -42,7 +42,7 @@ async function dragonShell() {
     \\ \\\\
      \\ \\\\    /\\)
       \\ \\\\  ((\\
-       \\ \\\\ / \\
+       \\ \\\\ / \
         \\ \\\\/
          \\_\\
   `;
