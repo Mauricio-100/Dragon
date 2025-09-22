@@ -1,67 +1,100 @@
-# 🐉 Dragon CLI
+<!-- Remplacez "dragon-cli" par le nom de votre paquet npm -->
+<!-- Remplacez "Mauricio-100/Dragon" par votre "utilisateur/dépôt" GitHub -->
 
-[![npm version](https://img.shields.io/npm/v/dragon-cli.svg?style=flat-square)](https://www.npmjs.com/package/dragon-cli)
-[![npm downloads](https://img.shields.io/npm/dm/dragon-cli.svg?style=flat-square)](https://www.npmjs.com/package/dragon-cli)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![Made with Node.js](https://img.shields.io/badge/Node.js-16.xx-green.svg?style=flat-square&logo=node.js)](https://nodejs.org/)
+# 🐉 Dragon CLI - Votre Assistant IA Personnel dans le Terminal
 
-**Votre assistant de codage et d'automatisation IA personnel, directement dans votre terminal.**
+[![NPM Version](https://img.shields.io/npm/v/dragon-cli.svg?style=for-the-badge)](https://www.npmjs.com/package/dragon-cli)
+[![NPM Downloads](https://img.shields.io/npm/dm/dragon-cli.svg?style=for-the-badge)](https://www.npmjs.com/package/dragon-cli)
+[![Licence](https://img.shields.io/github/license/Mauricio-100/Dragon?style=for-the-badge)](./LICENSE)
 
-Dragon CLI est un outil en ligne de commande (CLI) puissant et léger qui se connecte à votre propre backend IA pour comprendre le langage naturel. Demandez-lui de coder, d'exécuter des commandes ou d'automatiser des tâches, le tout dans une interface interactive et sécurisée.
+**Dragon CLI est un outil en ligne de commande qui transforme votre terminal en un dialogue intelligent avec une IA. Au lieu de vous souvenir de commandes complexes, décrivez simplement ce que vous voulez faire. Dragon se connecte à *votre propre serveur IA* pour une expérience rapide, sécurisée et entièrement sous votre contrôle.**
 
 ---
 
 <p align="center">
-  <img src="https://i.imgur.com/v8iH8hC.png" alt="Dragon CLI in action" width="700"/>
+  <i>"Crée un serveur express simple dans un fichier app.js"</i><br>
+  <i>"Affiche les 5 derniers commits de ce projet"</i><br>
+  <i>"Installe la dépendance 'chalk' avec npm"</i>
 </p>
 
 ---
 
-## 🌟 Caractéristiques Principales
+## Architecture : Comment ça fonctionne ?
 
-*   **🧠 Cerveau Déporté :** Se connecte à votre propre serveur d'IA (Gemini, etc.) pour des réponses rapides et un contrôle total.
-*   **💻 Génération de Code :** Crée des fichiers et des extraits de code dans n'importe quel langage.
-*   **셸 Shell Intelligent :** Transforme des phrases comme "montre-moi mes 5 derniers commits" en commandes `git log -n 5`.
-*   **🛡️ Sécurité Intégrée :** Chaque action potentiellement dangereuse (exécution de commande, écriture de fichier) requiert votre confirmation explicite. Pas de surprises.
-*   **🚀 Léger et Rapide :** L'outil lui-même est minimaliste. Toute la charge de travail est gérée par votre serveur.
-*   **🎨 Interface Soignée :** Une expérience utilisateur agréable avec des couleurs, des logos et des prompts clairs.
+La puissance de Dragon réside dans son architecture découplée. Le CLI est intentionnellement léger et ne contient aucune logique IA. Il agit comme une interface sécurisée vers votre propre cerveau distant.
 
-## 📦 Installation
+1.  **Vous** donnez un ordre en langage naturel à Dragon CLI.
+2.  **Dragon CLI** envoie cet ordre de manière sécurisée à votre serveur personnel.
+3.  **Votre Serveur IA** (que vous contrôlez) reçoit l'ordre, le met en forme dans un prompt système, et l'envoie à l'API de Gemini.
+4.  La réponse de l'IA est renvoyée à votre serveur, qui la formate en JSON et la transmet à Dragon CLI.
+5.  **Dragon CLI** vous présente le plan d'action et attend votre confirmation avant d'exécuter quoi que ce soit.
 
-Pour installer Dragon CLI globalement sur votre système via npm, exécutez la commande suivante :
+Cette approche garantit que vos clés API secrètes ne sont **jamais** exposées sur la machine cliente.
+
+## 🚀 Guide de Démarrage Complet en 3 Étapes
+
+Pour utiliser Dragon, vous avez besoin de ses deux composantes : le cerveau (le serveur) et le corps (le CLI).
+
+### Étape 1 : Déployer Votre Propre Serveur IA (Le Cerveau)
+
+Le CLI a besoin d'une URL à qui parler. Nous fournissons un serveur template prêt à être déployé sur des plateformes comme Render.
+
+1.  **Cliquez sur ce lien pour créer votre propre copie du serveur :**
+    *   **[Utiliser ce template de serveur IA](https://github.com/Mauricio-100/Dragon-Server-Template)** <!-- Remplacez par le lien vers VOTRE template de serveur -->
+
+2.  **Déployez ce nouveau dépôt sur un service d'hébergement** comme [Render](https://render.com/), Vercel, ou Heroku. Le déploiement est généralement automatique.
+
+3.  **Configurez les variables d'environnement sur la plateforme d'hébergement :** Votre serveur aura besoin de connaître votre clé API secrète de Google. Dans les paramètres de votre service sur Render, ajoutez une variable d'environnement :
+    *   `GEMINI_API_KEY`: Votre clé API que vous obtenez depuis Google AI Studio.
+    *   `SECRET_KEY`: Une longue chaîne de caractères aléatoires que vous inventez, pour sécuriser les tokens de votre serveur.
+
+4.  Une fois le déploiement terminé, Render vous donnera une URL publique. **Notez cette URL**, vous en aurez besoin.
+
+### Étape 2 : Installer Dragon CLI (Le Corps)
+
+Maintenant que le cerveau est en ligne, installez le client sur votre machine.
 
 ```bash
-npm install -g dragon-cli
+npm install -g dragon-cli```
+<!-- Remplacez "dragon-cli" par le nom final de votre paquet sur npm -->
 ```
-### Guide d'utilisation
-lance la commande 
+### Étape 3 : Configurer la Connexion
+
+Créez un pont entre le corps et le cerveau.
+
+1.  Créez un fichier `.env` dans votre répertoire personnel. C'est le moyen le plus sûr de stocker vos informations de connexion.
+    ```bash
+    nano ~/.env
+    ```
+
+2.  Ajoutez-y les informations de votre serveur. Le `BEARER_TOKEN` est la clé API (`sk-...`) que **votre propre serveur** a générée pour vous (via l'endpoint `/user/api-token` par exemple).
+
+    ```env
+    # L'URL de votre serveur déployé à l'étape 1
+    SERVER_URL="https://votre-serveur-sur-render.onrender.com/chat-direct"
+    ```
+
+    # La clé API générée par VOTRE serveur pour vous authentifier
+    .oso
+    ```
+    BEARER_TOKEN="sk-sxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    ```
+
+4.  Sauvegardez le fichier.
+
+## 🎮 Utilisation
+
+Tout est prêt ! Réveillez le Dragon :
+
 ```bash
 drn
 ```
-L'interface du Dragon apparaîtra, prête à recevoir vos ordres.
+##### L'interface apparaîtra, et vous pourrez commencer à dialoguer avec votre nouvel assistant. Pour quitter, tapez exit.
 
-Exemples de Commandes
-Voici quelques idées de ce que vous pouvez demander au Dragon :
+🛡️ Un Mot sur la Sécurité
+La sécurité est primordiale. Dragon ne prendra jamais l'initiative d'exécuter une commande ou de modifier un fichier. Chaque plan d'action généré par l'IA vous est d'abord soumis pour approbation. Vous avez toujours le contrôle final.
 
-Pour le code :
-### 🐉 > crée un serveur express simple dans un fichier nommé app.js
-### 🐉 > écris une fonction python qui calcule la suite de fibonacci et sauvegarde la dans fib.py
-Pour le terminal :
-### 🐉 > liste tous les fichiers de ce dossier, y compris les fichiers cachés
-### 🐉 > installe la dépendance 'chalk' avec npm
-### 🐉 > quel est mon répertoire de travail actuel ?
-Pour quitter, tapez simplement exit et appuyez sur Entrée.
+Approuvez-vous cette action ? (Exécuter: git log -n 5) (y/n) >
 
-### 🤝 Contribution
-Les contributions sont les bienvenues ! Si vous avez des idées d'amélioration ou des corrections de bugs, n'hésitez pas à ouvrir une "issue" ou une "pull request" sur notre dépôt GitHub.
-
-Fork du projet (https://github.com/Mauricio-100/Dragon/fork)
-Créez votre branche de fonctionnalité (git checkout -b feature/AmazingFeature)
-Commitez vos changements (git commit -m 'Add some AmazingFeature')
-Poussez vers la branche (git push origin feature/AmazingFeature)
-Ouvrez une Pull Request
-### 📜 Licence
-Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.
-
-## oubien forker le projet
-🥶
+📜 Licence
+Distribué sous la licence MIT. Voir LICENSE pour plus d'informations.
