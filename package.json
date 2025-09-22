@@ -19,6 +19,7 @@
   "homepage": "https://github.com/Mauricio-100/Dragon#readme",
   "devDependencies": {},
   "dependencies": {
+    "dotenv": "^17.2.2",
     "execa": "^9.6.0",
     "figlet": "^1.9.3",
     "gradient-string": "^3.0.0",
