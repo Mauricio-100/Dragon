@@ -17,7 +17,7 @@ const readline = require('readline');
 // --- CONFIGURATION ---
 dotenv.config();
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
-// Utilisation du modèle Gemini Flash ("Lite") pour une vitesse maximale
+// Utilisation du modèle Gemini Flash pour une vitesse maximale
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
 // Création de l'interface readline pour les prompts
@@ -42,7 +42,7 @@ async function dragonShell() {
     \\ \\\\
      \\ \\\\    /\\)
       \\ \\\\  ((\\
-       \\ \\\\ / \
+       \\ \\\\ / \\
         \\ \\\\/
          \\_\\
   `;
@@ -114,7 +114,8 @@ async function executeAction(action) {
   const answer = await askQuestion(confirmationMessage);
   
   if (answer.toLowerCase() !== 'y') {
-    console.log(chalk.red('Action annulée par l'utilisateur.\n'));
+    // LA CORRECTION : Utilisation de guillemets doubles pour éviter l'erreur de syntaxe
+    console.log(chalk.red("Action annulée par l'utilisateur.\n"));
     return;
   }
   
