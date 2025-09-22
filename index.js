@@ -87,4 +87,55 @@ async function processTask(task) {
     await executeAction(action);
 
   } catch (error) {
-    console.error(chalk.red('Erreur de communicati
+    console.error(chalk.red('Erreur de communication avec le cerveau du Dragon :'), error);
+    console.log(chalk.yellow('Veuillez reformuler votre demande ou vérifier votre clé API.'));
+  }
+}
+
+// --- LES GRIFFES DU DRAGON : Exécuter l'action ---
+async function executeAction(action) {
+  console.log(chalk.cyan(`\n🔥 Plan du Dragon : ${action.explanation}`));
+
+  if (action.type === 'error' || (!action.command && !action.code)) {
+    console.log(chalk.yellow("Le Dragon ne peut pas traiter cette demande ou l'a mal interprétée.\n"));
+    return;
+  }
+
+  // 3. LA CONFIRMATION : Le garde-fou ultime
+  const { confirm } = await inquirer.prompt([{
+    type: 'confirm',
+    name: 'confirm',
+    message: `Approuvez-vous cette action ? (${action.type === 'shell' ? `Exécuter: ${chalk.bold.yellow(action.command)}` : `Écrire dans: ${chalk.bold.yellow(action.filename)}`})`,
+    default: false,
+  }]);
+
+  if (!confirm) {
+    console.log(chalk.red('Action annulée par l\'utilisateur.\n'));
+    return;
+  }
+  
+  // 4. L'ACTION
+  if (action.type === 'shell') {
+    try {
+      console.log(chalk.gray(`\nRUNNING: ${action.command}\n`));
+      // Exécute la commande et affiche la sortie en temps réel
+      const subprocess = execa(action.command, { shell: true });
+      subprocess.stdout.pipe(process.stdout);
+      subprocess.stderr.pipe(process.stderr);
+      await subprocess;
+      console.log(chalk.green('\nCommande exécutée avec succès.\n'));
+    } catch (error) {
+      console.error(chalk.red(`\nErreur lors de l'exécution de la commande : ${error.message}\n`));
+    }
+  } else if (action.type === 'code') {
+    try {
+      await fs.writeFile(action.filename, action.code);
+      console.log(chalk.green(`Fichier ${action.filename} créé/modifié avec succès.\n`));
+    } catch (error) {
+      console.error(chalk.red(`Erreur lors de l'écriture du fichier : ${error.message}\n`));
+    }
+  }
+}
+
+// --- DÉMARRAGE ---
+dragonShell();
