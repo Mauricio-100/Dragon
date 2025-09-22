@@ -135,5 +135,5 @@ async function executeAction(action) {
 
 // --- DÉMARRAGE ---
 dragonShell();
-export PATH="$PATH:/usr/local/bin"
+
 
