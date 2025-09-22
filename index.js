@@ -17,8 +17,8 @@ const readline = require('readline');
 // --- CONFIGURATION ---
 dotenv.config();
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
-// CORRECTION : Utilisation du nom de modèle actuel et stable
-const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+// LA CORRECTION : Utilisation du modèle Gemini Flash pour une vitesse maximale
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
 // Création de l'interface readline pour les prompts
 const rl = readline.createInterface({
@@ -50,7 +50,6 @@ async function dragonShell() {
   const figletText = figlet.textSync('DRAGON', { font: 'Standard' });
   console.log(gradient.passion(figletText));
   
-  // CORRECTION : Modification du texte de bienvenue
   console.log(chalk.hex('#FF4500')('Bienvenue. Je suis Dragon. Que puis-je faire pour vous ? (Tapez "exit" pour quitter)\nOriginal by powered Dragon 🐉'));
 
   // 2. La boucle de commande
@@ -115,7 +114,7 @@ async function executeAction(action) {
   const answer = await askQuestion(confirmationMessage);
   
   if (answer.toLowerCase() !== 'y') {
-    console.log(chalk.red('Action annulée par l\'utilisateur.\n'));
+    console.log(chalk.red('Action annulée par l'utilisateur.\n'));
     return;
   }
   
