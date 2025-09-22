@@ -1,5 +1,11 @@
-#!/usr/-bin/env node
+#!/usr/bin/env node
 
+// ÉTAPE 1: Ajout du polyfill pour 'fetch' pour la compatibilité avec Node.js v16
+// Doit être placé TOUT EN HAUT du fichier.
+const fetch = require('node-fetch');
+global.fetch = fetch;
+
+// ÉTAPE 2: Importation de toutes les autres dépendances (sans doublons)
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { execa } = require('execa');
 const chalk = require('chalk');
@@ -7,13 +13,7 @@ const dotenv = require('dotenv');
 const figlet = require('figlet');
 const gradient = require('gradient-string');
 const fs = require('fs/promises');
-const readline = require('readline'); // <-- Remplacement de inquirer
-const fetch = require('node-fetch');
-global.fetch = fetch;
-
-// ... la suite de votre code commence ici
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-// ... etc.
+const readline = require('readline'); // <-- Remplacement stable de inquirer
 
 // --- CONFIGURATION ---
 dotenv.config();
@@ -64,10 +64,10 @@ async function dragonShell() {
         await processTask(task);
     }
   }
-  rl.close(); // Important : fermer l'interface readline
+  rl.close(); // Important : fermer l'interface readline pour que le script se termine
 }
 
-// --- LE CERVEAU DU DRAGON (inchangé) ---
+// --- LE CERVEAU DU DRAGON ---
 async function processTask(task) {
   console.log(chalk.blue('🐉 Le dragon réfléchit...'));
   
@@ -99,7 +99,7 @@ async function processTask(task) {
   }
 }
 
-// --- LES GRIFFES DU DRAGON (modifié pour utiliser readline) ---
+// --- LES GRIFFES DU DRAGON ---
 async function executeAction(action) {
   console.log(chalk.cyan(`\n🔥 Plan du Dragon : ${action.explanation}`));
 
@@ -108,7 +108,7 @@ async function executeAction(action) {
     return;
   }
 
-  // 3. LA CONFIRMATION (avec readline)
+  // 3. LA CONFIRMATION (avec readline, plus stable)
   const confirmationMessage = `Approuvez-vous cette action ? (${action.type === 'shell' ? `Exécuter: ${chalk.bold.yellow(action.command)}` : `Écrire dans: ${chalk.bold.yellow(action.filename)}`}) (y/n) > `;
   const answer = await askQuestion(confirmationMessage);
   
@@ -117,7 +117,7 @@ async function executeAction(action) {
     return;
   }
   
-  // 4. L'ACTION (inchangée)
+  // 4. L'ACTION
   if (action.type === 'shell') {
     try {
       console.log(chalk.gray(`\nRUNNING: ${action.command}\n`));
@@ -141,5 +141,3 @@ async function executeAction(action) {
 
 // --- DÉMARRAGE ---
 dragonShell();
-
-
