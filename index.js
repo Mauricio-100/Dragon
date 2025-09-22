@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
 // ÉTAPE 1: Ajout du polyfill pour 'fetch' pour la compatibilité avec Node.js v16
-// Doit être placé TOUT EN HAUT du fichier.
 const fetch = require('node-fetch');
 global.fetch = fetch;
 
-// ÉTAPE 2: Importation de toutes les autres dépendances (sans doublons)
+// ÉTAPE 2: Importation de toutes les autres dépendances
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { execa } = require('execa');
 const chalk = require('chalk');
@@ -13,12 +12,13 @@ const dotenv = require('dotenv');
 const figlet = require('figlet');
 const gradient = require('gradient-string');
 const fs = require('fs/promises');
-const readline = require('readline'); // <-- Remplacement stable de inquirer
+const readline = require('readline');
 
 // --- CONFIGURATION ---
 dotenv.config();
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+// CORRECTION : Utilisation du nom de modèle actuel et stable
+const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
 
 // Création de l'interface readline pour les prompts
 const rl = readline.createInterface({
@@ -26,7 +26,7 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-// Fonction pour poser une question et attendre la réponse (simule inquirer.prompt)
+// Fonction pour poser une question et attendre la réponse
 function askQuestion(query) {
   return new Promise(resolve => rl.question(query, resolve));
 }
@@ -49,7 +49,9 @@ async function dragonShell() {
   console.log(gradient.passion(dragonAscii));
   const figletText = figlet.textSync('DRAGON', { font: 'Standard' });
   console.log(gradient.passion(figletText));
-  console.log(chalk.hex('#FF4500')('Bienvenue. Je suis Dragon. Que puis-je faire pour vous ? (Tapez "exit" pour quitter)'));
+  
+  // CORRECTION : Modification du texte de bienvenue
+  console.log(chalk.hex('#FF4500')('Bienvenue. Je suis Dragon. Que puis-je faire pour vous ? (Tapez "exit" pour quitter)\nOriginal by powered Dragon 🐉'));
 
   // 2. La boucle de commande
   while (true) {
@@ -64,7 +66,7 @@ async function dragonShell() {
         await processTask(task);
     }
   }
-  rl.close(); // Important : fermer l'interface readline pour que le script se termine
+  rl.close();
 }
 
 // --- LE CERVEAU DU DRAGON ---
@@ -108,7 +110,7 @@ async function executeAction(action) {
     return;
   }
 
-  // 3. LA CONFIRMATION (avec readline, plus stable)
+  // 3. LA CONFIRMATION
   const confirmationMessage = `Approuvez-vous cette action ? (${action.type === 'shell' ? `Exécuter: ${chalk.bold.yellow(action.command)}` : `Écrire dans: ${chalk.bold.yellow(action.filename)}`}) (y/n) > `;
   const answer = await askQuestion(confirmationMessage);
   
