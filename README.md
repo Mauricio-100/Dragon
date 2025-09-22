@@ -89,6 +89,98 @@ Tout est prêt ! Réveillez le Dragon :
 ```bash
 drn
 ```
+### Ex de Server utiliser 
+
+```bash
+// ==========================
+//  IMPORTS DES MODULES
+// ==========================
+import express from 'express';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from 'dotenv';
+import cors from 'cors';
+
+// ==========================
+//  CONFIGURATION INITIALE
+// ==========================
+dotenv.config();
+const app = express();
+
+// Middlewares
+app.use(express.json()); // Pour comprendre le JSON envoyé par le Dragon
+app.use(cors());         // Pour autoriser les requêtes (bonne pratique)
+
+const PORT = process.env.PORT || 10000;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const INTERNAL_SECRET_TOKEN = process.env.INTERNAL_SECRET_TOKEN;
+
+// Validation : le serveur ne démarrera pas si les secrets ne sont pas définis
+if (!GEMINI_API_KEY || !INTERNAL_SECRET_TOKEN) {
+  console.error("ERREUR: GEMINI_API_KEY et INTERNAL_SECRET_TOKEN doivent être définis dans le fichier .env");
+  process.exit(1); // Arrête le processus
+}
+
+// ==========================
+//  CLIENT IA GEMINI
+// ==========================
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+// Nous utilisons "gemini-pro", le modèle le plus stable et universellement disponible.
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+
+// ==========================
+//  SÉCURITÉ (MIDDLEWARE D'AUTHENTIFICATION)
+// ==========================
+function apiAuth(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Extrait le token "Bearer <token>"
+
+  if (!token) {
+    return res.status(401).json({ error: "Accès non autorisé : token manquant." });
+  }
+
+  if (token !== INTERNAL_SECRET_TOKEN) {
+    return res.status(403).json({ error: "Accès interdit : token invalide." });
+  }
+
+  next(); // Si le token est bon, on continue vers la route principale
+}
+
+
+// ==========================
+//  LA ROUTE PRINCIPALE DE L'IA
+// ==========================
+// C'est ici que le Dragon CLI envoie ses requêtes.
+app.post('/chat-direct', apiAuth, async (req, res) => {
+  try {
+    const { message } = req.body; // Le "message" est le prompt complet envoyé par le Dragon
+
+    if (!message) {
+      return res.status(400).json({ error: "Le champ 'message' est requis." });
+    }
+
+    // On envoie le prompt directement à Gemini
+    const result = await model.generateContent(message);
+    const response = await result.response;
+    const aiTextResponse = response.text();
+
+    // On renvoie la réponse de l'IA au Dragon, dans un champ "reply"
+    res.json({ reply: aiTextResponse });
+
+  } catch (error) {
+    console.error("Erreur lors de la communication avec l'API Gemini :", error);
+    res.status(500).json({ error: `Erreur interne du serveur : ${error.message}` });
+  }
+});
+
+
+// ==========================
+//  DÉMARRAGE DU SERVEUR
+// ==========================
+app.listen(PORT, () => {
+  console.log(`🚀 Le cerveau du Dragon est en ligne et écoute sur le port ${PORT}`);
+});
+```
 ##### L'interface apparaîtra, et vous pourrez commencer à dialoguer avec votre nouvel assistant. Pour quitter, tapez exit.
 
 🛡️ Un Mot sur la Sécurité
