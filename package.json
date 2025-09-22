@@ -17,5 +17,11 @@
     "url": "https://github.com/Mauricio-100/Dragon/issues"
   },
   "homepage": "https://github.com/Mauricio-100/Dragon#readme",
-  "devDependencies": {}
+  "devDependencies": {},
+  "dependencies": {
+    "execa": "^9.6.0",
+    "figlet": "^1.9.3",
+    "gradient-string": "^3.0.0",
+    "inquirer": "^12.9.6"
+  }
 }
