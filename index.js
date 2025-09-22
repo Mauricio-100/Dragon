@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 
 // Utilisation de 'require' pour la compatibilité avec Node.js v16 et CommonJS
 const { GoogleGenerativeAI } = require('@google/generative-ai');
