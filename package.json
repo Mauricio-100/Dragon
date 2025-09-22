@@ -11,15 +11,11 @@
     "url": "git+https://github.com/Mauricio-100/Dragon.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Mauricio-100",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/Mauricio-100/Dragon/issues"
   },
   "homepage": "https://github.com/Mauricio-100/Dragon#readme",
-  "dependencies": {
-    "@google/generative-ai": "^0.24.1",
-    "chalk": "^5.6.2",
-    "commander": "^14.0.1"
-  }
+  "devDependencies": {}
 }
