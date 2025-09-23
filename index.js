@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
 const { Command } = require('commander');
-import fetch from 'node-fetch';
-import { execa } from 'execa';
-import chalk from 'chalk';
-import figlet from 'figlet';
-import gradient from 'gradient-string';
-import fs from 'fs/promises';
-import readline from 'readline';
-import os from 'os';
-import path from 'path';
+const fetch = require('node-fetch');
+const { execa } = require('execa');
+const chalk = require('chalk');
+const figlet = require('figlet');
+const gradient = require('gradient-string');
+const fs = require('fs/promises');
+const readline = require('readline');
+const os = require('os');
+const path = require('path');
 
 // --- GESTION DE LA CONFIGURATION LOCALE ---
 const CONFIG_DIR = path.join(os.homedir(), '.dragon');
