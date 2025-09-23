@@ -16,7 +16,7 @@
     "automation",
     "dragon"
   ],
-  "author": "Votre Nom",
+  "author": "Mauricio",
   "license": "MIT",
   "dependencies": {
     "chalk": "^4.1.2",
