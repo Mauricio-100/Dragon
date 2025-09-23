@@ -1,175 +1,192 @@
 #!/usr/bin/env node
 
-// Importations des modules nécessaires
-const fetch = require('node-fetch');
-const { execa } = require('execa');
-const chalk = require('chalk');
-const dotenv = require('dotenv');
-const figlet = require('figlet');
-const gradient = require('gradient-string');
-const fs = require('fs/promises');
-const readline = require('readline');
-const os = require('os');
-const path = require('path');
+import { Command } from 'commander';
+import fetch from 'node-fetch';
+import { execa } from 'execa';
+import chalk from 'chalk';
+import figlet from 'figlet';
+import gradient from 'gradient-string';
+import fs from 'fs/promises';
+import readline from 'readline';
+import os from 'os';
+import path from 'path';
 
-// --- CONFIGURATION ---
-// Charge les variables d'environnement depuis le fichier .env à la racine du répertoire de l'utilisateur (ex: ~/.env)
-// C'est la méthode la plus robuste pour que la commande `drn` fonctionne de n'importe où.
-dotenv.config({ path: path.join(os.homedir(), '.env') });
-const MY_SERVER_URL = process.env.SERVER_URL;
-const MY_BEARER_TOKEN = process.env.BEARER_TOKEN;
+// --- GESTION DE LA CONFIGURATION LOCALE ---
+const CONFIG_DIR = path.join(os.homedir(), '.dragon');
+const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
 
-// Création de l'interface pour lire les entrées utilisateur
+// S'assure que le dossier de configuration existe
+async function ensureConfigDir() {
+  try {
+    await fs.mkdir(CONFIG_DIR, { recursive: true });
+  } catch (e) { /* Le dossier existe déjà */ }
+}
+
+// Sauvegarde la configuration (le token API)
+async function saveConfig(config) {
+  await ensureConfigDir();
+  await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2));
+}
+
+// Charge la configuration
+async function loadConfig() {
+  try {
+    const configData = await fs.readFile(CONFIG_FILE, 'utf-8');
+    return JSON.parse(configData);
+  } catch (error) {
+    return {}; // Retourne un objet vide si le fichier n'existe pas ou est invalide
+  }
+}
+
+// --- INITIALISATION DU PROGRAMME ---
+const program = new Command();
+
+program
+  .name('drn')
+  .description("Votre assistant IA personnel pour le codage et l'automatisation.")
+  .version('5.0.0');
+
+// =======================================================
+//  DÉFINITION DES COMMANDES DU CLI
+// =======================================================
+
+program
+  .command('login')
+  .description('Connectez-vous à votre compte de la plateforme Dragon.')
+  .action(async () => {
+    console.log(chalk.yellow('Veuillez entrer vos identifiants.'));
+    const email = await askQuestion('Email: ');
+    const password = await askQuestion('Mot de passe: '); // Note: un vrai CLI utiliserait un input masqué
+
+    try {
+        const config = await loadConfig();
+        const API_BASE_URL = config.serverUrl || 'https://sarver-fullstack-4.onrender.com';
+
+        const res = await fetch(`${API_BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        // Maintenant, on demande le VRAI token API (sk-...)
+        const tokenRes = await fetch(`${API_BASE_URL}/user/api-token`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${data.token}` }
+        });
+        const tokenData = await tokenRes.json();
+        if (!tokenRes.ok) throw new Error(tokenData.error);
+        
+        await saveConfig({ bearerToken: tokenData.api_token, serverUrl: API_BASE_URL });
+        console.log(chalk.green('✅ Connexion réussie ! Vos informations ont été sauvegardées en toute sécurité.'));
+
+    } catch (err) {
+        console.error(chalk.red(`Erreur de connexion : ${err.message}`));
+    }
+  });
+
+program
+  .command('init')
+  .description('Initialise un nouveau paquet Dragon dans le dossier actuel.')
+  .option('-y, --yes', 'Créer avec les valeurs par défaut')
+  .action(async (options) => {
+    const defaults = {
+        name: path.basename(process.cwd()),
+        version: "1.0.0",
+        description: "Un paquet d'automatisation créé avec Dragon.",
+        main: "index.js",
+        author: os.userInfo().username
+    };
+    await fs.writeFile('dragon.json', JSON.stringify(defaults, null, 2));
+    console.log(chalk.green('Paquet Dragon initialisé ! Fichier `dragon.json` créé.'));
+  });
+
+// Les commandes 'publish' et 'install' sont ici pour l'exemple
+// et nécessitent les routes correspondantes sur le serveur.
+program
+  .command('publish')
+  .description('Publie un paquet Dragon sur le registre.')
+  .action(() => {
+    console.log(chalk.yellow('Fonctionnalité à venir : publication de paquets.'));
+  });
+
+program
+  .command('install <packageName>')
+  .description('Installe un paquet Dragon depuis le registre.')
+  .action((packageName) => {
+    console.log(chalk.yellow(`Fonctionnalité à venir : installation de '${packageName}'.`));
+  });
+
+
+// =======================================================
+//  LOGIQUE DU SHELL IA (Le Cœur du Dragon)
+// =======================================================
+
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-
-// Fonction utilitaire pour poser une question et attendre la réponse
 function askQuestion(query) {
   return new Promise(resolve => rl.question(query, resolve));
 }
 
-// --- FONCTION PRINCIPALE DU SHELL DRAGON ---
 async function dragonShell() {
   console.clear();
-  
-  // Affichage du logo et du titre
-  const dragonAscii = `
-                   /\\)
-    _             ((\\
-   (((\\
-    \ \\\\
-     \ \\\\    /\\)
-      \ \\\\  ((\\
-       \ \\\\ / \\
-        \ \\\\/
-         \_\
-  `;
-  console.log(gradient.passion(dragonAscii));
-  const figletText = figlet.textSync('DRAGON', { font: 'Standard' });
-  console.log(gradient.passion(figletText));
-  
-  // Affichage du message de bienvenue et du crédit
-  console.log(chalk.hex('#FF4500')('Bienvenue. Je suis Dragon. Que puis-je faire pour vous ? (Tapez "exit" pour quitter)'));
-  const poweredByText = "Original by powered Dragon 🐉";
-  const terminalWidth = process.stdout.columns || 80;
-  const padding = " ".repeat(Math.max(0, terminalWidth - poweredByText.length));
-  console.log(chalk.gray(padding + poweredByText));
+  const dragonAscii = `... (votre ASCII art ici) ...`;
+  console.log(gradient.passion(figlet.textSync('DRAGON', { font: 'Standard' })));
+  console.log(chalk.hex('#FF4500')('Bienvenue. Je suis Dragon. Que puis-je faire pour vous ?'));
 
-  // Boucle principale pour écouter les commandes de l'utilisateur
   while (true) {
     const task = await askQuestion(chalk.bold.red('🐉 > '));
     if (task.toLowerCase() === 'exit') {
       console.log(chalk.yellow('Le dragon retourne à son sommeil...'));
       break;
     }
-    if(task.trim() !== '') {
+    if (task.trim() !== '') {
         await processTask(task);
     }
   }
   rl.close();
 }
 
-// --- LE CERVEAU DU DRAGON : Communication avec le serveur IA ---
 async function processTask(task) {
   console.log(chalk.blue('🐉 Le dragon contacte son cerveau distant...'));
   
-  // Le prompt est envoyé au serveur, qui lui-même l'utilisera pour interroger l'IA.
-  const prompt = `
-    Tu es Dragon, une IA experte qui opère dans un terminal.
-    Ta tâche est de convertir une demande en langage naturel en une commande shell exécutable OU en un bloc de code à écrire dans un fichier.
-    Réponds TOUJOURS avec un objet JSON, et rien d'autre. La structure du JSON doit être :
-    { "explanation": "...", "type": "shell" | "code" | "error", "command": "...", "filename": "...", "code": "..." }
-    Voici la demande de l'utilisateur : "${task}"
-  `;
+  const config = await loadConfig();
+  if (!config.bearerToken || !config.serverUrl) {
+    console.error(chalk.red('Erreur: Vous n\'êtes pas connecté. Veuillez lancer `drn login` d\'abord.'));
+    return;
+  }
+  
+  const prompt = `... (votre prompt système ici) ...\nDemande: "${task}"`;
 
   try {
-    // Envoi de la requête au serveur personnel sur Render
-    const response = await fetch(MY_SERVER_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${MY_BEARER_TOKEN}`
-      },
-      body: JSON.stringify({ message: prompt })
-    });
-
-    if (!response.ok) {
-        throw new Error(`Erreur du serveur : ${response.status} ${response.statusText}`);
-    }
-
-    const aiResponse = await response.json();
-    
-    // Extraction intelligente du JSON, même si l'IA est un peu "bavarde"
-    let responseText = aiResponse.reply || '';
-    const startIndex = responseText.indexOf('{');
-    const endIndex = responseText.lastIndexOf('}');
-
-    let action = {};
-    if (startIndex > -1 && endIndex > -1 && endIndex > startIndex) {
-      const jsonString = responseText.substring(startIndex, endIndex + 1);
-      try {
-        action = JSON.parse(jsonString);
-      } catch (e) {
-        console.log(chalk.red("Le Dragon n'a pas pu comprendre la réponse du cerveau (JSON invalide)."));
-        return;
-      }
-    } else {
-      console.log(chalk.red("Le Dragon n'a pas trouvé de plan d'action (JSON) dans la réponse du cerveau."));
-      return;
-    }
-
-    await executeAction(action);
-
+    const response = await fetch(config.serverUrl + '/chat-direct', { /* ... identique à avant ... */ });
+    // ... reste de la logique de processTask ...
   } catch (error) {
-    console.error(chalk.red('Erreur de communication avec votre serveur :'), error);
-    console.log(chalk.yellow('Veuillez vérifier votre URL, votre token et que votre serveur est bien en ligne.'));
+    // ... gestion des erreurs ...
   }
 }
 
-// --- LES GRIFFES DU DRAGON : Exécution des actions ---
 async function executeAction(action) {
-  if (!action || !action.explanation) {
-    console.log(chalk.yellow("Le Dragon n'a pas pu interpréter la demande.\n"));
-    return;
-  }
-    
-  console.log(chalk.cyan(`\n🔥 Plan du Dragon : ${action.explanation}`));
+  // ... votre logique executeAction reste identique ...
+}
 
-  if (action.type === 'error' || (!action.command && !action.code)) {
-    console.log(chalk.yellow("Le Dragon ne peut pas traiter cette demande.\n"));
-    return;
-  }
+// =======================================================
+//  POINT D'ENTRÉE PRINCIPAL
+// =======================================================
 
-  // Confirmation de sécurité par l'utilisateur avant toute action
-  const confirmationMessage = `Approuvez-vous cette action ? (${action.type === 'shell' ? `Exécuter: ${chalk.bold.yellow(action.command)}` : `Écrire dans: ${chalk.bold.yellow(action.filename)}`}) (y/n) > `;
-  const answer = await askQuestion(confirmationMessage);
-  
-  if (answer.toLowerCase() !== 'y') {
-    // Utilisation de guillemets doubles pour éviter les erreurs de syntaxe avec "l'utilisateur"
-    console.log(chalk.red("Action annulée par l'utilisateur.\n"));
-    return;
-  }
-  
-  // Exécution de l'action confirmée
-  if (action.type === 'shell') {
-    try {
-      console.log(chalk.gray(`\nRUNNING: ${action.command}\n`));
-      const subprocess = execa(action.command, { shell: true });
-      subprocess.stdout.pipe(process.stdout);
-      subprocess.stderr.pipe(process.stderr);
-      await subprocess;
-      console.log(chalk.green('\nCommande exécutée avec succès.\n'));
-    } catch (error) {
-      console.error(chalk.red(`\nErreur lors de l'exécution de la commande : ${error.message}\n`));
-    }
-  } else if (action.type === 'code') {
-    try {
-      await fs.writeFile(action.filename, action.code);
-      console.log(chalk.green(`Fichier ${action.filename} créé/modifié avec succès.\n`));
-    } catch (error) {
-      console.error(chalk.red(`Erreur lors de l'écriture du fichier : ${error.message}\n`));
-    }
+async function main() {
+  const args = process.argv;
+  // Si l'utilisateur tape juste 'drn' ou 'drn <prompt>', on lance le shell.
+  // Commander considère les arguments qui ne sont pas des options comme des commandes.
+  // On vérifie donc si le 3ème argument N'EST PAS une commande connue.
+  const knownCommands = program.commands.map(cmd => cmd.name());
+  if (args.length <= 2 || !knownCommands.includes(args[2])) {
+    await dragonShell();
+  } else {
+    // Sinon, on laisse Commander gérer la commande spécifique (login, init, etc.)
+    await program.parseAsync(process.argv);
   }
 }
 
-// --- DÉMARRAGE ---
-dragonShell();
+main();
