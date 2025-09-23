@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { Command } from 'commander';
+const { Command } = require('commander');
 import fetch from 'node-fetch';
 import { execa } from 'execa';
 import chalk from 'chalk';
