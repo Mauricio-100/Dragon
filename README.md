@@ -59,6 +59,15 @@ pour activer le `Dragon` qui veille
 ### `OPEN SOURCE`
 
 ### Remerciement 
+## 🧠 Remerciements et Technologies
+
+Ce projet n'aurait pas pu voir le jour sans les outils et technologies incroyables mis à disposition par la communauté open-source et les grands acteurs de la tech.
+
+Nous tenons particulièrement à remercier l'équipe de **Google AI** pour avoir développé et rendu accessible le modèle **Gemini**, qui est le cerveau de l'intelligence de Dragon. Sa puissance et sa flexibilité sont au cœur de cet outil.
+
+[![AI Model](https://img.shields.io/badge/AI%20Model-Gemini-4285F4?style=for-the-badge&logo=google-gemini&logoColor=white)](https://aistudio.google.com/)
+
+
 
 Nous remercions a `google` pour la creation de api qui nous a beaucoup aider pour le projet `Dragon` et c'est projet et un projet et notre chedoeuvre
 
@@ -67,7 +76,7 @@ Nous remercions a `google` pour la creation de api qui nous a beaucoup aider pou
 |-----------|--------|-----------|
 |  free     |free    |free       |
 |___________|--------|-----------|
-|   ✅      |   ✅   |  🤨fr tier|
+|   ✅      |   ⛔️   |  🤨fr tier|
 |-----------|________|__________.|
 
 # Alors vous voulais toujour reflechir 
